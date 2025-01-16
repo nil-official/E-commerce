@@ -11,30 +11,30 @@ import com.ecommerce.dto.OrderDto;
 
 public interface OrderService {
 
-    public OrderDto createOrder(User user, AddressDto shippingAddress) throws OrderException;
+    OrderDto createOrder(User user, AddressDto shippingAddress) throws OrderException;
 
-    public OrderDto createOrder(User user, Long addressId) throws OrderException;
+    OrderDto createOrder(User user, Long addressId) throws OrderException;
 
-    public Order findOrderById(Long orderId) throws OrderException;
+    Order findOrderById(Long orderId) throws OrderException;
 
-    public OrderDto findOrderByOrderId(User user, String orderId) throws UserException, OrderException;
+    OrderDto findOrderByOrderId(User user, String orderId) throws UserException, OrderException;
 
-    public OrderDto viewOrderById(Long orderId) throws OrderException;
+    OrderDto viewOrderById(Long orderId) throws OrderException;
 
-    public List<OrderDto> usersOrderHistory(Long userId);
+    List<OrderDto> usersOrderHistory(Long userId);
 
-    public OrderDto confirmedOrder(Long orderId) throws OrderException;
+    OrderDto confirmedOrder(Long orderId) throws OrderException;
 
-    public OrderDto shippedOrder(Long orderId) throws OrderException;
+    OrderDto shippedOrder(Long orderId) throws OrderException;
 
-    public OrderDto deliveredOrder(Long orderId) throws OrderException;
+    OrderDto deliveredOrder(Long orderId) throws OrderException;
 
-    public OrderDto cancelOrder(Long orderId) throws OrderException;
+    OrderDto cancelOrder(Long orderId) throws OrderException;
 
-    public List<OrderDto> getAllOrders();
+    List<OrderDto> getAllOrders();
 
-    public void deleteOrder(Long orderId) throws OrderException;
+    void deleteOrder(Long orderId) throws OrderException;
 
-    public Order findOrderByRazorpayOrderId(String razorpayOrderId) throws OrderException;
+    Order findOrderByRazorpayOrderId(String razorpayOrderId) throws OrderException;
 
 }

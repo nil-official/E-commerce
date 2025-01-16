@@ -64,19 +64,19 @@ public class OrderServiceImplementation implements OrderService {
             // Get the associated product from the order item
             Product product = item.getProduct();
 
-            // Check if there's enough quantity available to fulfill the order for each size
-            for (Size size : product.getSizes()) {
-                if (size.getQuantity() < item.getQuantity()) {
-                    throw new OrderException("Not enough stock for size: " + size.getName());
-                }
+            // Get the ordered item's size
+            Size orderedSize = product.getSizes().stream()
+                    .filter(size -> size.getName().toString().equals(item.getSize()))
+                    .findFirst()
+                    .orElseThrow(() -> new OrderException("Invalid size: " + item.getSize()));
 
-                // Update the quantity of the size by checking the size name
-                if (size.getName().toString().equals(item.getSize())) {
-                    // Reduce the available quantity of the size
-                    size.setQuantity(size.getQuantity() - item.getQuantity());
-                }
-
+            // Check if there's enough quantity available to fulfill the order
+            if (orderedSize.getQuantity() < item.getQuantity()) {
+                throw new OrderException("Not enough stock for size: " + orderedSize.getName());
             }
+
+            // Reduce the available quantity of the size
+            orderedSize.setQuantity(orderedSize.getQuantity() - item.getQuantity());
 
             // Save the updated sizes in the product
             product.setSizes(product.getSizes());
@@ -184,14 +184,6 @@ public class OrderServiceImplementation implements OrderService {
         return orderRepository.findByRazorpayOrderId(razorpayOrderId)
                 .orElseThrow(() -> new OrderException("Order not found with Razorpay Order ID: " + razorpayOrderId));
     }
-
-//	@Override
-//	public Order placedOrder(Long orderId) throws OrderException {
-//		Order order=findOrderById(orderId);
-//		order.setOrderStatus(OrderStatus.PLACED);
-//		order.getPaymentDetails().setStatus(PaymentStatus.COMPLETED);
-//		return order;
-//	}
 
     @Override
     public OrderDto confirmedOrder(Long orderId) throws OrderException {

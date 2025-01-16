@@ -52,4 +52,13 @@ public class UserProductController {
 
     }
 
+    @GetMapping("/products/search/category")
+    public ResponseEntity<Page<Product>> searchProductByCategoryHandler(@RequestParam String category,
+                                                              @RequestParam Integer pageNumber, @RequestParam Integer pageSize) {
+
+        Page<Product> products = productService.searchProductByCategory(category, pageNumber, pageSize);
+        return new ResponseEntity<>(products, HttpStatus.OK);
+
+    }
+
 }

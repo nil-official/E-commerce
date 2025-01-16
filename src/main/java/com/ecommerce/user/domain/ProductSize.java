@@ -6,5 +6,13 @@ public enum ProductSize {
     M,
     L,
     XL,
-    XXL
+    XXL,
+
+    T28,
+    T30,
+    T32,
+    T34,
+    T36,
+    T38,
+    T40,
 }
