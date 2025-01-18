@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class IssueResponse {
 
     private Long id;
+    private Long userId;
     private String referenceNumber;
     private String title;
     private String description;

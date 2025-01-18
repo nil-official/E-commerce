@@ -43,6 +43,7 @@ public class IssueServiceImpl implements IssueService {
 
         return new IssueResponse(
                 issue.getId(),
+                issue.getUser().getId(),
                 issue.getReferenceNumber(),
                 issue.getTitle(),
                 issue.getDescription(),
@@ -63,6 +64,7 @@ public class IssueServiceImpl implements IssueService {
         return issueRepository.findByUser(user).stream()
                 .map(issue -> new IssueResponse(
                         issue.getId(),
+                        issue.getUser().getId(),
                         issue.getReferenceNumber(),
                         issue.getTitle(),
                         issue.getDescription(),
@@ -77,6 +79,7 @@ public class IssueServiceImpl implements IssueService {
         return issueRepository.findAll().stream()
                 .map(issue -> new IssueResponse(
                         issue.getId(),
+                        issue.getUser().getId(),
                         issue.getReferenceNumber(),
                         issue.getTitle(),
                         issue.getDescription(),
@@ -103,6 +106,7 @@ public class IssueServiceImpl implements IssueService {
 
         return new IssueResponse(
                 issue.getId(),
+                issue.getUser().getId(),
                 issue.getReferenceNumber(),
                 issue.getTitle(),
                 issue.getDescription(),
