@@ -1,7 +1,8 @@
 package com.ecommerce.user.domain;
 
 public enum PaymentMethod {
-	CARD,
+    CARD,
+    WALLET,
     NET_BANKING,
     UPI,
     PAYPAL,

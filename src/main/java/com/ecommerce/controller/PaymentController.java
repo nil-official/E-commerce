@@ -15,6 +15,8 @@ import com.ecommerce.response.ApiResponse;
 import com.ecommerce.response.PaymentLinkResponse;
 import com.razorpay.RazorpayException;
 
+import java.util.Map;
+
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api")
@@ -39,6 +41,12 @@ public class PaymentController {
             logger.error("Error processing webhook: {}", e.getMessage(), e);
             return new ResponseEntity<>(new ApiResponse("Webhook processing failed", false), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/payments/callback")
+    public ResponseEntity<Void> handlePaymentCallback(@RequestParam Map<String, String> params) {
+        paymentService.processPaymentCallback(params);
+        return ResponseEntity.status(HttpStatus.FOUND).build();
     }
 
 }

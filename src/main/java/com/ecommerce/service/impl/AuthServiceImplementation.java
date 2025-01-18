@@ -21,6 +21,7 @@ import com.ecommerce.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,20 +37,37 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
 public class AuthServiceImplementation implements AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private RoleRepository roleRepository;
-    private CartService cartService;
+    private final RoleRepository roleRepository;
+    private final CartService cartService;
     private final VerifyTokenRepository verifyTokenRepository;
     private final EmailService emailService;
-    private JwtTokenProvider jwtTokenProvider;
-    private CustomUserDetailsService customUserDetails;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final CustomUserDetailsService customUserDetails;
+    private final String frontendBaseUrl;
 
-    @Value("${frontend.base.url}")
-    private String frontendBaseUrl;
+    public AuthServiceImplementation(UserRepository userRepository,
+                                     PasswordEncoder passwordEncoder,
+                                     RoleRepository roleRepository,
+                                     CartService cartService,
+                                     VerifyTokenRepository verifyTokenRepository,
+                                     EmailService emailService,
+                                     JwtTokenProvider jwtTokenProvider,
+                                     CustomUserDetailsService customUserDetails,
+                                     @Qualifier("frontendBaseUrl") String frontendBaseUrl) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
+        this.cartService = cartService;
+        this.verifyTokenRepository = verifyTokenRepository;
+        this.emailService = emailService;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.customUserDetails = customUserDetails;
+        this.frontendBaseUrl = frontendBaseUrl;
+    }
 
     @Override
     public void signUp(RegisterRequest registerRequest) throws UserException, MessagingException {

@@ -1,7 +1,9 @@
 package com.ecommerce.service.impl;
 
 import com.ecommerce.service.PaymentService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import com.ecommerce.user.domain.PaymentMethod;
 import org.json.JSONObject;
@@ -19,23 +21,38 @@ import com.ecommerce.user.domain.PaymentStatus;
 import com.razorpay.PaymentLink;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.util.Map;
 
 @Service
-@AllArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentServiceImpl.class);
     private final OrderService orderService;
     private final OrderRepository orderRepository;
     private final RazorpayClient razorpayClient;
-    private final String callbackUrl;
+    private final String frontendBaseUrl;
+    private final String backendBaseUrl;
 
+    public PaymentServiceImpl(OrderService orderService,
+                              OrderRepository orderRepository,
+                              RazorpayClient razorpayClient,
+                              @Qualifier("frontendBaseUrl") String frontendBaseUrl,
+                              @Qualifier("backendBaseUrl") String backendBaseUrl) {
+        this.orderService = orderService;
+        this.orderRepository = orderRepository;
+        this.razorpayClient = razorpayClient;
+        this.frontendBaseUrl = frontendBaseUrl;
+        this.backendBaseUrl = backendBaseUrl;
+    }
 
     @Override
     public PaymentLinkResponse createPaymentLink(Long orderId, String jwt) throws RazorpayException, UserException, OrderException {
 
         Order order = orderService.findOrderById(orderId);
-        if (order.getOrderStatus() != OrderStatus.PENDING){
+        if (order.getOrderStatus() != OrderStatus.PENDING) {
             throw new OrderException("Order already placed! No need to pay again.");
         }
 
@@ -57,9 +74,9 @@ public class PaymentServiceImpl implements PaymentService {
         notify.put("sms", true);
         notify.put("email", true);
         paymentLinkRequest.put("notify", notify);
-
         paymentLinkRequest.put("reminder_enable", true);
-        paymentLinkRequest.put("callback_url", callbackUrl + orderId);
+
+        paymentLinkRequest.put("callback_url", backendBaseUrl + "/api/payments/callback?orderId=" + order.getOrderId());
         paymentLinkRequest.put("callback_method", "get");
 
         PaymentLink payment = razorpayClient.paymentLink.create(paymentLinkRequest);
@@ -104,6 +121,26 @@ public class PaymentServiceImpl implements PaymentService {
             logger.warn("Unsupported event type: {}", eventType);
         }
 
+    }
+
+    @Override
+    public void processPaymentCallback(Map<String, String> params) {
+        try {
+            // Extract necessary parameters
+            String orderId = params.get("orderId"); // Razorpay order ID in callback URL
+
+            // Construct the clean redirect URL (exclude unnecessary query parameters)
+            String redirectUrl = frontendBaseUrl + "/orders/" + orderId;
+
+            // Perform the redirection
+            HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+            if (response != null) {
+                response.sendRedirect(redirectUrl);
+            }
+        } catch (Exception ex) {
+            logger.error("Error handling payment callback: {}", ex.getMessage());
+            throw new RuntimeException("Failed to process payment callback.", ex);
+        }
     }
 
 }
