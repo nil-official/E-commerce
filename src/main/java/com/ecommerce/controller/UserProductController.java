@@ -24,13 +24,13 @@ public class UserProductController {
     private ProductService productService;
 
     @GetMapping("/products")
-    public ResponseEntity<Page<Product>> findProductByCategoryHandler(@RequestParam String category, @RequestParam List<String> color,
-                                                                      @RequestParam List<String> size, @RequestParam Integer minPrice,
+    public ResponseEntity<Page<Product>> findProductByCategoryHandler(@RequestParam String query, @RequestParam List<String> color,
+                                                                      @RequestParam Integer minPrice,
                                                                       @RequestParam Integer maxPrice, @RequestParam Integer minDiscount,
                                                                       @RequestParam String sort, @RequestParam String stock,
                                                                       @RequestParam Integer pageNumber, @RequestParam Integer pageSize) {
 
-        Page<Product> res = productService.getAllProduct(category, color, size, minPrice, maxPrice, minDiscount, sort, stock, pageNumber, pageSize);
+        Page<Product> res = productService.getAllProduct(query, color, minPrice, maxPrice, minDiscount, sort, stock, pageNumber, pageSize);
         return new ResponseEntity<>(res, HttpStatus.ACCEPTED);
 
     }
@@ -54,7 +54,7 @@ public class UserProductController {
 
     @GetMapping("/products/search/category")
     public ResponseEntity<Page<Product>> searchProductByCategoryHandler(@RequestParam String category,
-                                                              @RequestParam Integer pageNumber, @RequestParam Integer pageSize) {
+                                                                        @RequestParam Integer pageNumber, @RequestParam Integer pageSize) {
 
         Page<Product> products = productService.searchProductByCategory(category, pageNumber, pageSize);
         return new ResponseEntity<>(products, HttpStatus.OK);

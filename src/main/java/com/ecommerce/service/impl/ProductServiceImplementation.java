@@ -253,19 +253,21 @@ public class ProductServiceImplementation implements ProductService {
     }
 
     @Override
-    public Page<Product> getAllProduct(String category, List<String> colors,
-                                       List<String> sizes, Integer minPrice, Integer maxPrice,
+    public Page<Product> getAllProduct(String query, List<String> colors,
+                                       Integer minPrice, Integer maxPrice,
                                        Integer minDiscount, String sort, String stock, Integer pageNumber, Integer pageSize) {
 
         // Filter products based on the provided parameters
-        List<Product> products = productRepository.filterProducts(category, minPrice, maxPrice, minDiscount, sort);
+        List<Product> products = productRepository.filterProducts(query, minPrice, maxPrice, minDiscount, sort);
 
-        // Filter products based on sizes
+        // Filter products based on colors
         if (!colors.isEmpty()) {
             products = products.stream()
                     .filter(p -> colors.stream().anyMatch(c -> c.equalsIgnoreCase(p.getColor())))
                     .collect(Collectors.toList());
         }
+
+        // Filter products based on stock availability
         if (stock != null) {
             if (stock.equals("in_stock")) {
                 products = products.stream().filter(p -> p.getQuantity() > 0).collect(Collectors.toList());
@@ -274,8 +276,35 @@ public class ProductServiceImplementation implements ProductService {
             }
         }
 
+        // Paginate the filtered products
         return PaginationUtil.paginateList(products, pageNumber, pageSize);
-
     }
+
+
+//    @Override
+//    public Page<Product> getAllProduct(String category, List<String> colors,
+//                                       List<String> sizes, Integer minPrice, Integer maxPrice,
+//                                       Integer minDiscount, String sort, String stock, Integer pageNumber, Integer pageSize) {
+//
+//        // Filter products based on the provided parameters
+//        List<Product> products = productRepository.filterProducts(category, minPrice, maxPrice, minDiscount, sort);
+//
+//        // Filter products based on sizes
+//        if (!colors.isEmpty()) {
+//            products = products.stream()
+//                    .filter(p -> colors.stream().anyMatch(c -> c.equalsIgnoreCase(p.getColor())))
+//                    .collect(Collectors.toList());
+//        }
+//        if (stock != null) {
+//            if (stock.equals("in_stock")) {
+//                products = products.stream().filter(p -> p.getQuantity() > 0).collect(Collectors.toList());
+//            } else if (stock.equals("out_of_stock")) {
+//                products = products.stream().filter(p -> p.getQuantity() < 1).collect(Collectors.toList());
+//            }
+//        }
+//
+//        return PaginationUtil.paginateList(products, pageNumber, pageSize);
+//
+//    }
 
 }

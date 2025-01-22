@@ -12,37 +12,57 @@ import com.ecommerce.model.Product;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(value = """
-    SELECT * FROM product
-    WHERE
-        title ~* CONCAT('\\y', :query, '\\y') OR
-        description ~* CONCAT('\\y', :query, '\\y') OR
-        brand ~* CONCAT('\\y', :query, '\\y') OR
-        color ~* CONCAT('\\y', :query, '\\y') OR
-        EXISTS (
-            SELECT 1 FROM categories
-            WHERE categories.id = product.category_id
-            AND categories.name ~* CONCAT('\\y', :query, '\\y')
-        )
-    """, nativeQuery = true)
+            SELECT * FROM product
+            WHERE
+                title ~* CONCAT('\\y', :query, '\\y') OR
+                description ~* CONCAT('\\y', :query, '\\y') OR
+                brand ~* CONCAT('\\y', :query, '\\y') OR
+                color ~* CONCAT('\\y', :query, '\\y') OR
+                EXISTS (
+                    SELECT 1 FROM categories
+                    WHERE categories.id = product.category_id
+                    AND categories.name ~* CONCAT('\\y', :query, '\\y')
+                )
+            """, nativeQuery = true)
     List<Product> searchProduct(@Param("query") String query);
 
     @Query(value = """
-    SELECT p
-    FROM Product p
-    JOIN p.category c
-    WHERE LOWER(c.name) = LOWER(:categoryName)
-    """)
+            SELECT p
+            FROM Product p
+            JOIN p.category c
+            WHERE LOWER(c.name) = LOWER(:categoryName)
+            """)
     List<Product> findProductsByCategoryName(@Param("categoryName") String categoryName);
 
+//    Old filter
+//    @Query("SELECT p FROM Product p " +
+//            "WHERE (p.category.name = :category OR :category = '') " +
+//            "AND ((:minPrice IS NULL AND :maxPrice IS NULL) OR (p.discountedPrice BETWEEN :minPrice AND :maxPrice)) " +
+//            "AND (:minDiscount IS NULL OR p.discountPercent >= :minDiscount) " +
+//            "ORDER BY " +
+//            "CASE WHEN :sort = 'price_low' THEN p.discountedPrice END ASC, " +
+//            "CASE WHEN :sort = 'price_high' THEN p.discountedPrice END DESC")
+//    List<Product> filterProducts(
+//            @Param("category") String category,
+//            @Param("minPrice") Integer minPrice,
+//            @Param("maxPrice") Integer maxPrice,
+//            @Param("minDiscount") Integer minDiscount,
+//            @Param("sort") String sort
+//    );
+
+    //    New filter
     @Query("SELECT p FROM Product p " +
-            "WHERE (p.category.name = :category OR :category = '') " +
+            "WHERE (:query IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "OR LOWER(p.description) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "OR LOWER(p.brand) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "OR LOWER(p.color) LIKE LOWER(CONCAT('%', :query, '%'))) " +
             "AND ((:minPrice IS NULL AND :maxPrice IS NULL) OR (p.discountedPrice BETWEEN :minPrice AND :maxPrice)) " +
             "AND (:minDiscount IS NULL OR p.discountPercent >= :minDiscount) " +
             "ORDER BY " +
             "CASE WHEN :sort = 'price_low' THEN p.discountedPrice END ASC, " +
             "CASE WHEN :sort = 'price_high' THEN p.discountedPrice END DESC")
     List<Product> filterProducts(
-            @Param("category") String category,
+            @Param("query") String query,
             @Param("minPrice") Integer minPrice,
             @Param("maxPrice") Integer maxPrice,
             @Param("minDiscount") Integer minDiscount,
